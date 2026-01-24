@@ -13,6 +13,7 @@ import {
   Ticket,
   Plane,
   Home,
+  Calendar,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { gethotel, handlehotelbooking } from "@/api";
@@ -40,6 +41,7 @@ import Loader from "@/components/Loader";
 import { setUser } from "@/store";
 const BookHotelPage = () => {
   const [quantity, setQuantity] = useState(1);
+  const [checkInDate, setCheckInDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
   const router = useRouter();
   const { id } = router.query; // Access the hotel ID from the URL
   const [hotels, sethotels] = useState<Hotel[]>([]);
@@ -122,7 +124,8 @@ const BookHotelPage = () => {
         user?.id,
         hotel?.id,
         quantity,
-        grandTotal
+        grandTotal,
+        checkInDate
       );
       const updateuser = {
         ...user,
@@ -162,6 +165,19 @@ const BookHotelPage = () => {
               Location
             </Label>
             <Input id="location" value={hotel.location} readOnly />
+          </div>
+          {/* Check-in Date */}
+          <div className="space-y-2">
+            <Label htmlFor="checkInDate" className="flex items-center">
+              <Calendar className="w-4 h-4 mr-2" />
+              Check-in Date
+            </Label>
+            <Input
+              id="checkInDate"
+              type="date"
+              value={checkInDate}
+              onChange={(e) => setCheckInDate(e.target.value)}
+            />
           </div>
           {/* Price Per Night */}
           <div className="space-y-2">

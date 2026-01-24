@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Phone,
@@ -32,33 +32,19 @@ const index = () => {
     lastName: user?.lastName ? user?.lastName : "",
     email: user?.email ? user?.email : "",
     phoneNumber: user?.phoneNumber ? user?.phoneNumber : "",
-    bookings: [
-      {
-        type: "Flight",
-        bookingId: "F123456",
-        date: "2024-03-25",
-        quantity: 2,
-        totalPrice: 12499,
-        details: {
-          from: "Delhi",
-          to: "Mumbai",
-          airline: "IndiGo",
-        },
-      },
-      {
-        type: "Hotel",
-        bookingId: "H789012",
-        date: "2024-04-15",
-        quantity: 1,
-        totalPrice: 8999,
-        details: {
-          name: "Taj Palace",
-          location: "Goa",
-          nights: 3,
-        },
-      },
-    ],
+    bookings: user?.bookings ? user?.bookings : [],
   });
+
+  // Sync userData with user bookings whenever user changes
+  useEffect(() => {
+    setUserData({
+      firstName: user?.firstName ? user?.firstName : "",
+      lastName: user?.lastName ? user?.lastName : "",
+      email: user?.email ? user?.email : "",
+      phoneNumber: user?.phoneNumber ? user?.phoneNumber : "",
+      bookings: user?.bookings ? user?.bookings : [],
+    });
+  }, [user]);
 
   const [editForm, setEditForm] = useState({ ...userData });
   const handleSave = async () => {
