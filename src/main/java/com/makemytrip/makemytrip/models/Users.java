@@ -46,13 +46,27 @@ public class Users {
 
 
     public static class Booking{
+        private String id;  // Unique booking ID
         private String type;
         private String bookingId;
         private String date;
         private int quantity;
         private double totalPrice;
 
+        // Constructor to generate unique ID
+        public Booking() {
+            this.id = java.util.UUID.randomUUID().toString();
+        }
+
         // Getters and Setters
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
         public String getType() {
             return type;
         }

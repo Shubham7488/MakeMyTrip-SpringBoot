@@ -35,6 +35,7 @@ public class UserServices{
         return userRepository.findByEmail(email);
     }
 
+    @SuppressWarnings("null")
     public Users editprofile(String id,Users updatedUser){
         Users user=userRepository.findById(id).orElse(null);
         if(user != null){

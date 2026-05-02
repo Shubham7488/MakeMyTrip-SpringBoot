@@ -1,6 +1,5 @@
 package com.makemytrip.makemytrip.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.makemytrip.makemytrip.models.Users;
@@ -8,7 +7,6 @@ import com.makemytrip.makemytrip.services.UserServices;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     private UserServices userServices;

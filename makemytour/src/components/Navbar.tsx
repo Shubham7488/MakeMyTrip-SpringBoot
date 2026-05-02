@@ -13,18 +13,27 @@ import {
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { clearUser } from "@/store";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
+
 const Navbar = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user.user);
   const router = useRouter();
+  
   const logout = () => {
     dispatch(clearUser());
   };
+
+  const handleLogoClick = () => {
+    if (router.pathname !== "/") {
+      router.push("/");
+    }
+  };
+
   return (
     <header className=" backdrop-blur-md py-4 sticky top-0 z-50">
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2 text-white cursor-pointer" onClick={() => router.push("/")}>
+        <div className="flex items-center space-x-2 text-white cursor-pointer" onClick={handleLogoClick}>
           <Plane className="w-8 h-8 text-red-500" />
           <span className="text-2xl font-bold text-black">MakeMyTour</span>
         </div>
@@ -66,6 +75,11 @@ const Navbar = () => {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/refunds")}>
+                    <span className="mr-2">💰</span>
+                    <span>Refund Tracker</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logout()}>
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>

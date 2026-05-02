@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Refund Preview</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;padding:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f4f4f4}</style>
+</head>
+<body>
+  <h1>Refund Preview (simulated logged-in view)</h1>
+  <p>This is a temporary preview of the refund data the frontend would render.</p>
+  <div id="container"></div>
+  <script>
+    // Embedded refund JSON (from backend)
+    const data = {
+      "success": true,
+      "count": 1,
+      "userId": "69f4e9d778651b21c2f97922",
+      "refunds": [
+        {
+          "bookingId": "BK-15545a35-be64-46f5-ba1d-f79effab17a3",
+          "bookingType": "Hotel",
+          "refundId": "REF-1777658726105",
+          "userId": "69f4e9d778651b21c2f97922",
+          "originalAmount": 200.0,
+          "refundAmount": 100.0,
+          "refundPercentage": 50,
+          "status": "COMPLETED",
+          "createdDate": "2026-05-01T23:35:26.107",
+          "processedDate": "2026-05-01T23:39:44.294",
+          "completedDate": "2026-05-01T23:40:05.1",
+          "expectedRefundDate": null,
+          "cancellationReason": "Customer Request",
+          "adminNotes": "",
+          "id": "69f4eb6678651b21c2f97924"
+        }
+      ]
+    };
+
+    const container = document.getElementById('container');
+    if(!data || !data.refunds || data.refunds.length===0){
+      container.innerHTML = '<p>No refunds found.</p>';
+    } else {
+      const refund = data.refunds[0];
+      const html = `
+        <table>
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Refund ID</td><td>${refund.refundId}</td></tr>
+            <tr><td>Internal ID</td><td>${refund.id}</td></tr>
+            <tr><td>Booking ID</td><td>${refund.bookingId}</td></tr>
+            <tr><td>Booking Type</td><td>${refund.bookingType}</td></tr>
+            <tr><td>Original Amount</td><td>${refund.originalAmount}</td></tr>
+            <tr><td>Refund Amount</td><td>${refund.refundAmount}</td></tr>
+            <tr><td>Refund %</td><td>${refund.refundPercentage}%</td></tr>
+            <tr><td>Status</td><td>${refund.status}</td></tr>
+            <tr><td>Created</td><td>${refund.createdDate}</td></tr>
+            <tr><td>Processed</td><td>${refund.processedDate || '-'}</td></tr>
+            <tr><td>Completed</td><td>${refund.completedDate || '-'}</td></tr>
+            <tr><td>Cancellation Reason</td><td>${refund.cancellationReason}</td></tr>
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

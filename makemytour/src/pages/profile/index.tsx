@@ -12,15 +12,26 @@ import {
   LogOut,
   Plane,
   Building2,
+  Trash2,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { clearUser, setUser } from "@/store";
 import { editprofile } from "@/api";
+import CancellationDialog from "@/components/CancellationDialog";
 const index = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: any) => state.user.user);
   const router = useRouter();
+  const [isCancellationDialogOpen, setIsCancellationDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [refreshBookings, setRefreshBookings] = useState(0);
+
+  // Debug: Log user object
+  useEffect(() => {
+    console.log('Profile page - User object:', user);
+    console.log('Profile page - User ID:', user?.id || user?._id);
+  }, [user]);
 
   const logout = () => {
     dispatch(clearUser());
@@ -45,6 +56,26 @@ const index = () => {
       bookings: user?.bookings ? user?.bookings : [],
     });
   }, [user]);
+
+  const handleCancelClick = (booking: any) => {
+    console.log('Cancel booking clicked - Full booking object:', booking);
+    console.log('Cancel booking - booking._id:', booking._id);
+    console.log('Cancel booking - booking.bookingId:', booking.bookingId);
+    console.log('Cancel booking - All keys:', Object.keys(booking));
+    setSelectedBooking(booking);
+    setIsCancellationDialogOpen(true);
+  };
+
+  const handleCancellationSuccess = () => {
+    // Remove the canceled booking from the user's bookings (use unique ID field)
+    if (selectedBooking) {
+      dispatch(setUser({
+        ...user,
+        bookings: user.bookings.filter((b: any) => b.id !== selectedBooking.id)
+      }));
+    }
+    setRefreshBookings(refreshBookings + 1);
+  };
 
   const [editForm, setEditForm] = useState({ ...userData });
   const handleSave = async () => {
@@ -79,6 +110,15 @@ const index = () => {
   };
   return (
     <div className="min-h-screen bg-gray-50 pt-8 px-4">
+      {/* Cancellation Dialog */}
+      <CancellationDialog
+        isOpen={isCancellationDialogOpen}
+        onClose={() => setIsCancellationDialogOpen(false)}
+        booking={selectedBooking}
+        userId={user?.id || user?._id}
+        onCancellationSuccess={handleCancellationSuccess}
+      />
+
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Profile Section */}
@@ -230,7 +270,7 @@ const index = () => {
                         <p className="text-sm text-gray-500">{booking?.type}</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-4 h-4" />
                         <span>{formatDate(booking?.date)}</span>
@@ -243,6 +283,17 @@ const index = () => {
                         <CreditCard className="w-4 h-4" />
                         <span>Paid</span>
                       </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => handleCancelClick(booking)}
+                        className="flex items-center space-x-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Cancel Booking</span>
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -41,6 +41,7 @@ import { Users, Ticket } from "lucide-react";
 import SignupDialog from "@/components/SignupDialog";
 import Loader from "@/components/Loader";
 import { setUser } from "@/store";
+import ReviewList from '@/components/ReviewList';
 const BookFlightPage = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -73,6 +74,7 @@ const BookFlightPage = () => {
     return <div>No flight data available for this ID.</div>;
   }
   const flight = flights[0];
+  const bookingForThisFlight = user?.bookings?.find((b: any) => b?.bookingId === flight?.id || b?.id === flight?.id);
   const flightDetails = {
     from: "Bengaluru",
     to: "New Delhi",
@@ -480,6 +482,12 @@ const BookFlightPage = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+              <h2 className="text-lg font-bold mb-4">Reviews</h2>
+              <ReviewList userId={user?.id} targetType="FLIGHT" targetId={id as string} bookingId={bookingForThisFlight?.id} />
             </div>
           </div>
 

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = "*")
 public class AdminController {
     @Autowired
     private UserRepository userRepository;
@@ -30,15 +29,18 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
     @PostMapping("/flight")
+    @SuppressWarnings("null")
     public Flight addflight(@RequestBody Flight flight){
         return flightRepository.save(flight);
     }
 
     @PostMapping("/hotel")
+    @SuppressWarnings("null")
     public Hotel addhotel(@RequestBody Hotel hotel){
         return hotelRepository.save(hotel);
     }
     @PutMapping("flight/{id}")
+    @SuppressWarnings("null")
     public ResponseEntity<Flight> editflight(@PathVariable String id, @RequestBody Flight updatedFlight){
         Optional<Flight> flightOptional=flightRepository.findById(id);
         if(flightOptional.isPresent()){
@@ -56,6 +58,7 @@ public class AdminController {
         return ResponseEntity.notFound().build();
     }
     @PutMapping("hotel/{id}")
+    @SuppressWarnings("null")
     public ResponseEntity<Hotel> editHotel (@PathVariable String id, @RequestBody Hotel updatedHotel){
         Optional<Hotel> hotelOptional=hotelRepository.findById(id);
         if(hotelOptional.isPresent()){
