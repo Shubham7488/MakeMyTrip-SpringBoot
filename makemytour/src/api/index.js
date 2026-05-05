@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = "https://your-backend.onrender.com";
+const BACKEND_URL = "https://makemytrip-springboot.onrender.com";
 
 export const login = async (email, password) => {
   try {
