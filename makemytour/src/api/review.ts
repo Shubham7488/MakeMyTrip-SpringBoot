@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082' || "https://makemytrip-springboot.onrender.com";
 
 export async function getReviews(targetType: string, targetId: string) {
   const res = await fetch(`${BASE_URL}/api/review/target?type=${targetType}&id=${targetId}`);

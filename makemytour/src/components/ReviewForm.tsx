@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import RatingStars from './RatingStars';
 import { addReview } from '../api/review';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082' || "https://makemytrip-springboot.onrender.com";
 
 interface Props {
   userId: string;
