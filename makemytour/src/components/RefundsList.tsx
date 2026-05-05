@@ -27,7 +27,7 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`http://localhost:8082/api/refund/user/${userId}`);
+      const res = await fetch(`https://makemytrip-springboot.onrender.com/api/refund/user/${userId}`);
       const data = await res.json();
 
       console.log("Refund API Response:", data); // 🔥 DEBUG
@@ -80,7 +80,7 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
     if (!window.confirm('Delete this refund?')) return;
 
     try {
-      const res = await fetch(`http://localhost:8082/api/refund/${refundId}/admin/delete`, {
+      const res = await fetch(`https://makemytrip-springboot.onrender.com/api/refund/${refundId}/admin/delete`, {
         method: 'DELETE'
       });
 

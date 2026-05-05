@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8082/api/:path*'
+        destination: 'https://makemytrip-springboot.onrender.com/api/:path*'
       }
     ];
   }
