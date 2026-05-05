@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/review")
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://makemytrip-frontend-newest.onrender.com", "*"})
 public class ReviewController {
 
     @Autowired
