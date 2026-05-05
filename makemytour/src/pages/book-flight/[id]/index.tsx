@@ -41,7 +41,7 @@ import { Users, Ticket } from "lucide-react";
 import SignupDialog from "@/components/SignupDialog";
 import Loader from "@/components/Loader";
 import { setUser } from "@/store";
-import ReviewList from '@/components/ReviewList';
+import ReviewSection from '@/components/ReviewSection';
 const BookFlightPage = () => {
   const router = useRouter();
   const { id } = router.query;
@@ -484,10 +484,9 @@ const BookFlightPage = () => {
               </div>
             </div>
 
-            {/* Reviews Section */}
+              {/* Reviews Section */}
             <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
-              <h2 className="text-lg font-bold mb-4">Reviews</h2>
-              <ReviewList userId={user?.id} targetType="FLIGHT" targetId={id as string} bookingId={bookingForThisFlight?.id} />
+              <ReviewSection userId={user?.id || ''} targetType="FLIGHT" targetId={id as string} bookingId={bookingForThisFlight?.id || ''} />
             </div>
           </div>
 

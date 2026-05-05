@@ -6,7 +6,7 @@ import { AlertCircle } from 'lucide-react';
 import RefundCard from './RefundCard';
 
 interface RefundsListProps {
-  userId?: string;
+  userId: string;
   refreshTrigger?: number;
 }
 
@@ -21,32 +21,19 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
 
   const itemsPerPage = 5;
 
-  const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082';
-  const DEV_PREVIEW = process.env.NEXT_PUBLIC_DEV_PREVIEW === 'true';
-  const DEV_PREVIEW_USER = process.env.NEXT_PUBLIC_DEV_PREVIEW_USER || '69f4e9d778651b21c2f97922';
-  const effectiveUserId = userId || (DEV_PREVIEW ? DEV_PREVIEW_USER : '');
-
   // ✅ FETCH REFUNDS
   const fetchRefunds = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`${BASE_URL}/api/refund/user/${effectiveUserId}`);
+
+      const res = await fetch(`http://localhost:8082/api/refund/user/${userId}`);
       const data = await res.json();
 
       console.log("Refund API Response:", data); // 🔥 DEBUG
 
-      if (data && data.success && Array.isArray(data.refunds)) {
-        // normalize ids and fields (handle different possible id names)
-        const normalized = data.refunds.map((r: any) => ({
-          ...r,
-          refundId: r.refundId || r.id || r._id,
-          status: r.status ? String(r.status).toUpperCase() : 'PENDING',
-          refundAmount: (r.refundAmount ?? r.refund_amount ?? r.refund) || 0,
-          originalAmount: (r.originalAmount ?? r.original_amount ?? r.amount) || 0,
-          createdDate: r.createdDate || r.created_date || r.createdAt || r.created_at || new Date().toISOString(),
-        }));
-        setRefunds(normalized);
+      if (data.success && Array.isArray(data.refunds)) {
+        setRefunds(data.refunds);
       } else {
         setRefunds([]);
         setError('No refunds found');
@@ -61,10 +48,10 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
 
   // ✅ AUTO FETCH
   useEffect(() => {
-    if (effectiveUserId) {
+    if (userId) {
       fetchRefunds();
     }
-  }, [effectiveUserId, refreshTrigger]); // 🔥 IMPORTANT
+  }, [userId, refreshTrigger]); // 🔥 IMPORTANT
 
   // ✅ FILTER + SORT
   useEffect(() => {
@@ -93,15 +80,14 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
     if (!window.confirm('Delete this refund?')) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/api/refund/${refundId}/admin/delete`, {
+      const res = await fetch(`http://localhost:8082/api/refund/${refundId}/admin/delete`, {
         method: 'DELETE'
       });
 
       const data = await res.json();
 
       if (data.success) {
-        // refresh list to ensure consistency
-        await fetchRefunds();
+        setRefunds(prev => prev.filter(r => r.refundId !== refundId));
       } else {
         alert('Delete failed');
       }
@@ -118,11 +104,10 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
   // ✅ STATS FIX (IMPORTANT)
   const stats = {
     total: refunds.length,
-    pending: refunds.filter(r => String(r.status).toUpperCase() === 'PENDING').length,
-    processed: refunds.filter(r => String(r.status).toUpperCase() === 'PROCESSED').length,
-    completed: refunds.filter(r => String(r.status).toUpperCase() === 'COMPLETED').length,
-    // total refunded amount (sum of refundAmount)
-    totalAmount: refunds.reduce((sum, r) => sum + (Number(r.refundAmount) || 0), 0)
+    pending: refunds.filter(r => r.status === 'PENDING').length,
+    processed: refunds.filter(r => r.status === 'PROCESSED').length,
+    completed: refunds.filter(r => r.status === 'COMPLETED').length,
+    totalAmount: refunds.reduce((sum, r) => sum + (r.originalAmount || 0), 0) // 🔥 FIXED
   };
 
   // ✅ LOADING
@@ -160,7 +145,7 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
           Completed: {stats.completed}
         </Card>
         <Card className="p-3">
-          ₹{stats.totalAmount.toFixed(2)}
+          ₹{stats.totalAmount.toFixed(0)} {/* 🔥 FIXED */}
         </Card>
       </div>
 
@@ -187,16 +172,13 @@ const RefundsList: React.FC<RefundsListProps> = ({ userId, refreshTrigger = 0 })
       {paginatedRefunds.length === 0 ? (
         <p>No refunds found</p>
       ) : (
-        paginatedRefunds.map((refund) => {
-          const id = refund.refundId || refund.id || refund._id;
-          return (
-            <RefundCard
-              key={id}
-              refund={refund}
-              onDelete={() => handleDelete(id)}
-            />
-          );
-        })
+        paginatedRefunds.map((refund) => (
+          <RefundCard
+            key={refund.refundId}
+            refund={refund}
+            onDelete={() => handleDelete(refund.refundId)}
+          />
+        ))
       )}
 
       {/* PAGINATION */}

@@ -136,16 +136,22 @@ export default function Home() {
   }, [user]);
 
   const cityOptions = useMemo(() => {
-    const cities = new Set<string>();
-    flight.forEach((flight) => {
-      cities.add(flight.from);
-      cities.add(flight.to);
-    });
-    hotel.forEach((hotel) => {
-      cities.add(hotel.location);
-    });
-    return Array.from(cities).map((city) => ({ value: city, label: city }));
-  }, [flight, hotel]);
+  const cities = new Set<string>();
+
+  (Array.isArray(flight) ? flight : []).forEach((f) => {
+    if (f?.from) cities.add(f.from);
+    if (f?.to) cities.add(f.to);
+  });
+
+  (Array.isArray(hotel) ? hotel : []).forEach((h) => {
+    if (h?.location) cities.add(h.location);
+  });
+
+  return Array.from(cities).map((city) => ({
+    value: city,
+    label: city
+  }));
+}, [flight, hotel]);
 
   if (loading) {
     return <Loader />;
@@ -177,6 +183,7 @@ export default function Home() {
     return date.toLocaleString("en-US", options);
   };
   const handlebooknow = (id: any) => {
+    console.log('Navigating to booking for ID:', id, 'type:', bookingtype);
     if (bookingtype === "flights") {
       router.push(`/book-flight/${id}`);
     } else {

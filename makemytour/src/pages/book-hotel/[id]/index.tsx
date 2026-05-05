@@ -39,7 +39,7 @@ import { useDispatch, useSelector } from "react-redux";
 import SignupDialog from "@/components/SignupDialog";
 import Loader from "@/components/Loader";
 import { setUser } from "@/store";
-import ReviewList from '@/components/ReviewList';
+import ReviewSection from '@/components/ReviewSection';
 const BookHotelPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [checkInDate, setCheckInDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
@@ -471,8 +471,7 @@ const BookHotelPage = () => {
 
               {/* Full Reviews List */}
               <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-                <h3 className="text-lg font-semibold mb-4">Reviews</h3>
-                <ReviewList userId={user?.id} targetType="HOTEL" targetId={id as string} bookingId={bookingForThisHotel?.id} />
+                <ReviewSection userId={user?.id || ''} targetType="HOTEL" targetId={id as string} bookingId={bookingForThisHotel?.id || ''} />
               </div>
             </div>
 

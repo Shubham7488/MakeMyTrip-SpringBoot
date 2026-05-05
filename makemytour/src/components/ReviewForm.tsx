@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from 'react';
 import RatingStars from './RatingStars';
+import { addReview } from '../api/review';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082';
 
@@ -23,38 +26,51 @@ const ReviewForm: React.FC<Props> = ({ userId, bookingId, targetType, targetId, 
       setLoading(true);
       setError(null);
       console.log('Submitting review - userId:', userId, 'bookingId:', bookingId, 'targetType:', targetType, 'targetId:', targetId);
-      const body = { userId, bookingId, targetType, targetId, rating, reviewText: text, images };
-      const res = await fetch(`${BASE_URL}/api/review/add`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setText('');
-        setImages([]);
-        onAdded && onAdded();
-      } else {
-        setError(data.error || 'Failed');
-      }
-    } catch (e:any) {
-      setError(e.message || 'Error');
-    } finally { setLoading(false); }
+      const data = await addReview({ userId, bookingUniqueId: bookingId, targetType, targetId, rating, reviewText: text, images });
+      setText('');
+      setRating(5);
+      setImages([]);
+      onAdded?.();
+    } catch (e: any) {
+      console.error('Review submit error:', e);
+      setError(e.message || 'Error submitting review');
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   return (
-    <div className="p-4 border rounded">
-      <h3 className="font-semibold">Write a review</h3>
+    <div className="p-4 border rounded-lg bg-white">
+      <h3 className="font-semibold mb-3">Write a review</h3>
       <RatingStars value={rating} editable onChange={setRating} />
-      <textarea value={text} onChange={(e) => setText(e.target.value)} className="w-full p-2 mt-2 border rounded" placeholder="Share your experience" />
-      {/* Image upload placeholder - expects URL list for now */}
-      <input value={images.join(',')} onChange={(e)=>setImages(e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} placeholder="Comma-separated image URLs" className="w-full mt-2 p-2 border rounded" />
-      {error && <div className="text-red-500">{error}</div>}
-      <div className="mt-2">
-        <button onClick={submit} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded">{loading? 'Saving...' : 'Submit'}</button>
+      <textarea 
+        value={text} 
+        onChange={(e) => setText(e.target.value)} 
+        className="w-full p-3 mt-3 border rounded-lg resize-vertical min-h-[100px] focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+        placeholder="Share your honest experience about your stay..." 
+      />
+      <div className="mt-3 text-sm text-gray-500">
+        Image URLs (comma separated)
+      </div>
+      <input 
+        value={images.join(', ')} 
+        onChange={(e)=>setImages(e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} 
+        placeholder="https://example.com/img1.jpg, https://example.com/img2.jpg" 
+        className="w-full p-3 mt-1 border rounded-lg" 
+      />
+      {error && <div className="text-red-500 text-sm mt-2 p-2 bg-red-50 rounded">{error}</div>}
+      <div className="mt-4">
+        <button 
+          onClick={submit} 
+          disabled={loading || !text.trim()} 
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        >
+          {loading ? 'Submitting...' : 'Submit Review'}
+        </button>
       </div>
     </div>
   );
 };
 
 export default ReviewForm;
+

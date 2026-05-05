@@ -1,12 +1,8 @@
 package com.makemytrip.makemytrip.controllers;
 
-import com.makemytrip.makemytrip.dto.ReviewDTOs.ReplyRequest;
-import com.makemytrip.makemytrip.dto.ReviewDTOs.ReviewRequest;
-import com.makemytrip.makemytrip.models.Reply;
 import com.makemytrip.makemytrip.models.Review;
+import com.makemytrip.makemytrip.models.Reply;
 import com.makemytrip.makemytrip.services.ReviewService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,92 +13,76 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/review")
+@CrossOrigin(origins = {"http://localhost:3000"})
 public class ReviewController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
 
     @Autowired
     private ReviewService reviewService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addReview(@RequestBody ReviewRequest req) {
+    public ResponseEntity<Map<String, Object>> addReview(@RequestBody Review review) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            if (req.rating < 1 || req.rating > 5) {
-                return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Rating must be between 1 and 5"));
-            }
-            Review r = new Review();
-            r.setUserId(req.userId);
-            // Accept either bookingUniqueId (preferred) or bookingId (legacy). Prefer bookingUniqueId when provided.
-            String incomingBookingUnique = req.bookingUniqueId != null && !req.bookingUniqueId.isBlank() ? req.bookingUniqueId : req.bookingId;
-            r.setBookingUniqueId(incomingBookingUnique);
-            logger.info("Received addReview request - userId={}, bookingId(request)={}, bookingUniqueId(request)={}", req.userId, req.bookingId, req.bookingUniqueId);
-            r.setTargetType(req.targetType);
-            r.setTargetId(req.targetId);
-            r.setRating(req.rating);
-            r.setReviewText(req.reviewText);
-            r.setImages(req.images != null ? req.images : List.of());
-
-            Review saved = reviewService.addReview(r);
-            return ResponseEntity.ok(Map.of("success", true, "review", saved));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
+            Review saved = reviewService.addReview(review);
+            response.put("success", true);
+            response.put("reviewId", saved.getReviewId());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
-    @GetMapping("/target/{type}/{id}")
-    public ResponseEntity<?> getReviewsByTarget(@PathVariable String type, @PathVariable String id) {
-        List<Review> list = reviewService.getReviewsByTarget(type.toUpperCase(), id);
-        Map<String, Object> res = new HashMap<>();
-        res.put("success", true);
-        res.put("count", list.size());
-        res.put("reviews", list);
-        res.put("averageRating", reviewService.getAverageRating(type.toUpperCase(), id));
-        return ResponseEntity.ok(res);
+    @GetMapping("/target")
+    public ResponseEntity<List<Review>> getReviewsByTarget(
+            @RequestParam String type, 
+            @RequestParam String id) {
+        List<Review> reviews = reviewService.getReviewsByTarget(type, id);
+        return ResponseEntity.ok(reviews);
     }
 
-    @PostMapping("/reply/add")
-    public ResponseEntity<?> addReply(@RequestBody ReplyRequest req) {
-        try {
-            Reply rep = new Reply();
-            rep.setReviewId(req.reviewId);
-            rep.setUserId(req.userId);
-            rep.setText(req.text);
-            Reply saved = reviewService.addReply(rep);
-            return ResponseEntity.ok(Map.of("success", true, "reply", saved));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
-        }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Review>> getReviewsByUser(@PathVariable String userId) {
+        return ResponseEntity.ok(reviewService.getReviewsByUser(userId));
     }
 
-    @PostMapping("/flag/{reviewId}")
-    public ResponseEntity<?> flagReview(@PathVariable String reviewId) {
-        try {
-            Review r = reviewService.flagReview(reviewId);
-            return ResponseEntity.ok(Map.of("success", true, "review", r));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
-        }
+    @PostMapping("/reply")
+    public ResponseEntity<Reply> addReply(@RequestBody Reply reply) {
+        return ResponseEntity.ok(reviewService.addReply(reply));
     }
 
-    @GetMapping("/admin/flagged")
-    public ResponseEntity<?> getFlagged() {
-        List<Review> list = reviewService.getFlaggedReviews();
-        return ResponseEntity.ok(Map.of("success", true, "count", list.size(), "reviews", list));
+    @GetMapping("/replies/{reviewId}")
+    public ResponseEntity<List<Reply>> getReplies(@PathVariable String reviewId) {
+        return ResponseEntity.ok(reviewService.getRepliesForReview(reviewId));
     }
 
-    @DeleteMapping("/admin/delete/{reviewId}")
-    public ResponseEntity<?> deleteReview(@PathVariable String reviewId) {
+    @PutMapping("/flag/{reviewId}")
+    public ResponseEntity<Review> flagReview(@PathVariable String reviewId) {
+        return ResponseEntity.ok(reviewService.flagReview(reviewId));
+    }
+
+    @GetMapping("/flagged")
+    public ResponseEntity<List<Review>> getFlaggedReviews() {
+        return ResponseEntity.ok(reviewService.getFlaggedReviews());
+    }
+
+    @DeleteMapping("/{reviewId}")
+    public ResponseEntity<String> deleteReview(@PathVariable String reviewId) {
         reviewService.deleteReview(reviewId);
-        return ResponseEntity.ok(Map.of("success", true));
+        return ResponseEntity.ok("Review deleted");
     }
 
-    @PostMapping("/like/{reviewId}")
-    public ResponseEntity<?> likeReview(@PathVariable String reviewId) {
-        try {
-            Review r = reviewService.likeReview(reviewId);
-            return ResponseEntity.ok(Map.of("success", true, "review", r));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("success", false, "error", e.getMessage()));
-        }
+    @PutMapping("/like/{reviewId}")
+    public ResponseEntity<Review> likeReview(@PathVariable String reviewId) {
+        return ResponseEntity.ok(reviewService.likeReview(reviewId));
+    }
+
+    @GetMapping("/average")
+    public ResponseEntity<Double> getAverageRating(
+            @RequestParam String type, 
+            @RequestParam String id) {
+        return ResponseEntity.ok(reviewService.getAverageRating(type, id));
     }
 }
+
