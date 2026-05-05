@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = "http://localhost:8082";
+const BACKEND_URL = "https://your-backend.onrender.com";
 
 export const login = async (email, password) => {
   try {
